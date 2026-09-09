@@ -1,0 +1,874 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>小米商城 - 演示版 Xiaomi Mall</title>
+<link rel="stylesheet" href="https://miaoda.feishu.cn/fonts/css2?family=Noto+Sans+SC:wght@300;400;500;700&display=swap">
+<style>
+  /* ============ 基础 ============ */
+  :root{
+    --primary:#ff6700;
+    --primary-dark:#e55c00;
+    --dark:#1f1f1f;
+    --text:#333;
+    --muted:#8a8a8a;
+    --bg:#f5f5f5;
+    --line:#e6e6e6;
+    --price:#ff3c00;
+    --radius:12px;
+    --shadow:0 4px 16px rgba(0,0,0,.06);
+    --shadow-hover:0 10px 28px rgba(0,0,0,.12);
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    font-family:"Noto Sans SC","Microsoft YaHei","PingFang SC",system-ui,sans-serif;
+    background:var(--bg);
+    color:var(--text);
+    font-size:14px;
+    line-height:1.6;
+  }
+  a{color:inherit;text-decoration:none;}
+  img{display:block;max-width:100%;}
+  button{font-family:inherit;cursor:pointer;border:none;background:none;}
+  input{font-family:inherit;}
+  .container{max-width:1240px;margin:0 auto;padding:0 20px;}
+  .section-title{font-size:22px;font-weight:500;letter-spacing:.5px;}
+  .section-title em{font-style:normal;color:var(--primary);}
+
+  /* ============ 顶栏 ============ */
+  .topbar{background:#333;color:#b0b0b0;font-size:12px;}
+  .topbar-inner{display:flex;justify-content:space-between;align-items:center;height:36px;}
+  .topbar a{padding:0 8px;transition:color .2s;}
+  .topbar a:hover{color:#fff;}
+  .topbar .tb-right a{border-right:1px solid #444;}
+  .topbar .tb-right a:last-child{border-right:none;}
+  .topbar .login-btn{color:var(--primary);}
+
+  /* ============ 主导航 ============ */
+  .header{
+    background:#fff;
+    position:sticky;top:0;z-index:100;
+    box-shadow:0 1px 0 rgba(0,0,0,.05);
+    transition:box-shadow .3s;
+  }
+  .header.scrolled{box-shadow:0 4px 14px rgba(0,0,0,.10);}
+  .header-inner{display:flex;align-items:center;gap:26px;height:72px;}
+  .logo{display:flex;align-items:center;gap:8px;flex-shrink:0;}
+  .logo .mi-badge{
+    width:40px;height:40px;border-radius:10px;background:var(--primary);
+    display:flex;align-items:center;justify-content:center;
+    box-shadow:0 3px 8px rgba(255,103,0,.35);
+  }
+  .logo .mi-badge svg{width:22px;height:22px;fill:#fff;}
+  .logo .logo-text{font-size:18px;font-weight:700;letter-spacing:1px;}
+  .logo .logo-text span{color:var(--primary);}
+  .nav{display:flex;gap:0;flex:1;}
+  .nav a{
+    padding:26px 14px;font-size:14px;color:var(--text);
+    position:relative;transition:color .2s;white-space:nowrap;
+  }
+  .nav a:hover{color:var(--primary);}
+  .nav a.active{color:var(--primary);}
+  .nav a.active::after{
+    content:"";position:absolute;left:14px;right:14px;bottom:0;height:3px;
+    background:var(--primary);border-radius:3px 3px 0 0;
+  }
+  .search{position:relative;display:flex;flex-shrink:0;}
+  .search input{
+    width:200px;height:38px;border:1px solid var(--line);border-right:none;
+    border-radius:6px 0 0 6px;padding:0 12px;font-size:13px;outline:none;
+    transition:border-color .2s,width .2s;
+  }
+  .search input:focus{width:260px;border-color:var(--primary);}
+  .search button{
+    width:46px;height:38px;background:#fff;border:1px solid var(--line);
+    border-radius:0 6px 6px 0;display:flex;align-items:center;justify-content:center;
+    transition:all .2s;
+  }
+  .search button:hover{background:var(--primary);border-color:var(--primary);}
+  .search button:hover svg{fill:#fff;}
+  .search button svg{width:16px;height:16px;fill:var(--muted);transition:fill .2s;}
+  .search-panel{
+    position:absolute;top:42px;left:0;right:46px;background:#fff;border-radius:8px;
+    box-shadow:var(--shadow-hover);z-index:60;overflow:hidden;display:none;
+  }
+  .search-panel.open{display:block;}
+  .search-panel .sp-item{
+    display:flex;gap:10px;align-items:center;padding:8px 12px;cursor:pointer;
+    transition:background .15s;
+  }
+  .search-panel .sp-item:hover{background:var(--bg);}
+  .search-panel .sp-item img{width:44px;height:44px;object-fit:contain;background:#fff;}
+  .search-panel .sp-item .sp-name{font-size:13px;}
+  .search-panel .sp-item .sp-price{color:var(--price);font-size:13px;font-weight:500;margin-left:auto;}
+  .search-panel .sp-empty{padding:18px;text-align:center;color:var(--muted);font-size:13px;}
+  .cart-btn{
+    position:relative;display:flex;align-items:center;gap:6px;height:38px;padding:0 14px;
+    border:1px solid var(--line);border-radius:6px;font-size:13px;flex-shrink:0;
+    transition:all .2s;
+  }
+  .cart-btn:hover{border-color:var(--primary);color:var(--primary);}
+  .cart-btn svg{width:16px;height:16px;fill:currentColor;}
+  .cart-badge{
+    position:absolute;top:-8px;right:-8px;min-width:18px;height:18px;border-radius:9px;
+    background:var(--primary);color:#fff;font-size:11px;line-height:18px;text-align:center;
+    padding:0 5px;display:none;
+  }
+  .cart-badge.show{display:block;}
+
+  /* ============ Hero 轮播 ============ */
+  .hero{margin-top:16px;position:relative;border-radius:var(--radius);overflow:hidden;}
+  .hero-slider{position:relative;border-radius:var(--radius);overflow:hidden;background:#fff;}
+  .slide{
+    position:relative;width:100%;aspect-ratio:1240/420;display:none;overflow:hidden;
+    cursor:pointer;
+  }
+  .slide.active{display:block;animation:fadeIn .5s ease;}
+  @keyframes fadeIn{from{opacity:0;}to{opacity:1;}}
+  .slide img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;}
+  .slide .slide-text{position:absolute;left:64px;top:50%;transform:translateY(-50%);z-index:2;max-width:420px;}
+  .slide .slide-text h2{font-size:38px;font-weight:700;line-height:1.25;color:#111;}
+  .slide .slide-text p{margin-top:12px;font-size:16px;color:#555;}
+  .slide .slide-text .slide-btn{
+    display:inline-block;margin-top:22px;padding:10px 26px;background:var(--primary);
+    color:#fff;border-radius:30px;font-size:14px;transition:all .2s;
+  }
+  .slide .slide-text .slide-btn:hover{background:var(--primary-dark);transform:translateY(-2px);box-shadow:0 6px 16px rgba(255,103,0,.4);}
+  .hero-arrow{
+    position:absolute;top:50%;transform:translateY(-50%);width:42px;height:64px;z-index:5;
+    background:rgba(0,0,0,.35);border-radius:6px;display:flex;align-items:center;justify-content:center;
+    opacity:0;transition:opacity .25s;color:#fff;
+  }
+  .hero:hover .hero-arrow{opacity:1;}
+  .hero-arrow:hover{background:var(--primary);}
+  .hero-arrow svg{width:18px;height:18px;fill:#fff;}
+  .hero-arrow.prev{left:8px;}
+  .hero-arrow.next{right:8px;}
+  .hero-dots{position:absolute;bottom:14px;left:50%;transform:translateX(-50%);display:flex;gap:8px;z-index:5;}
+  .hero-dots i{width:26px;height:4px;border-radius:2px;background:rgba(255,255,255,.55);cursor:pointer;transition:background .25s;}
+  .hero-dots i.on{background:var(--primary);}
+
+  /* ============ 快捷入口 ============ */
+  .quick{display:grid;grid-template-columns:repeat(8,1fr);gap:10px;margin-top:16px;}
+  .quick-item{
+    background:#fff;border-radius:var(--radius);padding:18px 6px 12px;text-align:center;
+    box-shadow:var(--shadow);transition:all .25s;cursor:pointer;
+  }
+  .quick-item:hover{transform:translateY(-4px);box-shadow:var(--shadow-hover);color:var(--primary);}
+  .quick-item .qi-icon{width:40px;height:40px;margin:0 auto 8px;display:flex;align-items:center;justify-content:center;}
+  .quick-item .qi-icon svg{width:36px;height:36px;fill:var(--text);transition:fill .25s;}
+  .quick-item:hover .qi-icon svg{fill:var(--primary);}
+  .quick-item span{font-size:13px;color:var(--text);}
+
+  /* ============ 秒杀 ============ */
+  .flash{margin-top:24px;background:#fff;border-radius:var(--radius);box-shadow:var(--shadow);padding:20px 24px;}
+  .flash-head{display:flex;align-items:center;gap:14px;margin-bottom:16px;}
+  .flash-head .flash-title{display:flex;align-items:center;gap:10px;}
+  .flash-title h2{font-size:20px;font-weight:700;}
+  .flash-title .lightning{width:30px;height:30px;border-radius:8px;background:var(--primary);display:flex;align-items:center;justify-content:center;}
+  .flash-title .lightning svg{width:16px;height:16px;fill:#fff;}
+  .countdown{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--muted);}
+  .countdown b{font-weight:400;color:var(--muted);margin-right:4px;}
+  .countdown .cd-num{
+    background:var(--dark);color:#fff;font-size:15px;font-weight:700;min-width:30px;height:30px;
+    border-radius:6px;display:flex;align-items:center;justify-content:center;letter-spacing:1px;
+  }
+  .countdown .cd-col{color:var(--muted);font-weight:700;}
+  .flash-more{margin-left:auto;font-size:13px;color:var(--muted);}
+  .flash-more:hover{color:var(--primary);}
+  .flash-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;}
+  .flash-card{
+    background:#fff;border:1px solid var(--line);border-radius:10px;padding:16px;
+    text-align:center;transition:all .25s;position:relative;overflow:hidden;
+  }
+  .flash-card:hover{box-shadow:var(--shadow-hover);transform:translateY(-3px);}
+  .flash-card .fc-img{height:150px;display:flex;align-items:center;justify-content:center;background:var(--bg);border-radius:8px;margin-bottom:10px;}
+  .flash-card .fc-img img{max-height:130px;object-fit:contain;}
+  .flash-card .fc-name{font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .flash-card .fc-price{margin-top:8px;font-size:16px;font-weight:700;color:var(--price);}
+  .flash-card .fc-price small{font-size:12px;font-weight:400;color:var(--muted);text-decoration:line-through;margin-left:6px;}
+  .flash-card .fc-bar{margin-top:8px;height:4px;background:#f0f0f0;border-radius:2px;overflow:hidden;}
+  .flash-card .fc-bar i{display:block;height:100%;background:linear-gradient(90deg,var(--primary),#ff9a3c);}
+  .flash-card .fc-stock{font-size:11px;color:var(--muted);margin-top:4px;}
+
+  /* ============ 商品楼层 ============ */
+  .floor{margin-top:28px;}
+  .floor-head{display:flex;align-items:baseline;gap:12px;margin-bottom:14px;}
+  .floor-head .floor-en{font-size:13px;color:var(--muted);}
+  .floor-more{margin-left:auto;font-size:13px;color:var(--muted);}
+  .floor-more:hover{color:var(--primary);}
+  .floor-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;}
+  .product-card{
+    background:#fff;border-radius:var(--radius);padding:18px;position:relative;
+    box-shadow:var(--shadow);transition:all .25s;overflow:hidden;
+  }
+  .product-card:hover{transform:translateY(-5px);box-shadow:var(--shadow-hover);}
+  .product-card .pc-tag{
+    position:absolute;top:12px;left:12px;background:var(--primary);color:#fff;
+    font-size:11px;padding:2px 8px;border-radius:4px;z-index:2;
+  }
+  .product-card .pc-tag.hot{background:#e53935;}
+  .product-card .pc-tag.flag{background:#1e88e5;}
+  .product-card .pc-img{
+    height:190px;display:flex;align-items:center;justify-content:center;
+    background:#fff;border-radius:8px;margin-bottom:14px;overflow:hidden;
+  }
+  .product-card .pc-img img{max-height:180px;object-fit:contain;transition:transform .35s;}
+  .product-card:hover .pc-img img{transform:scale(1.06);}
+  .product-card .pc-name{font-size:14px;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .product-card .pc-desc{font-size:12px;color:var(--muted);margin-top:4px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .product-card .pc-bottom{display:flex;align-items:center;justify-content:space-between;margin-top:12px;}
+  .product-card .pc-price{font-size:18px;font-weight:700;color:var(--price);}
+  .product-card .pc-price small{font-size:12px;font-weight:400;color:var(--muted);text-decoration:line-through;margin-left:6px;}
+  .product-card .pc-btn{
+    width:34px;height:34px;border-radius:50%;background:var(--bg);display:flex;
+    align-items:center;justify-content:center;transition:all .25s;color:var(--muted);
+  }
+  .product-card .pc-btn:hover{background:var(--primary);color:#fff;transform:rotate(90deg);}
+  .product-card .pc-btn svg{width:16px;height:16px;fill:currentColor;}
+  .floor-more-card{
+    background:linear-gradient(160deg,#2b2b2b,#1a1a1a);color:#fff;border-radius:var(--radius);
+    display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;
+    min-height:320px;cursor:pointer;transition:all .25s;box-shadow:var(--shadow);
+  }
+  .floor-more-card:hover{transform:translateY(-5px);box-shadow:var(--shadow-hover);}
+  .floor-more-card .fmc-icon{width:52px;height:52px;border-radius:50%;background:var(--primary);display:flex;align-items:center;justify-content:center;}
+  .floor-more-card .fmc-icon svg{width:22px;height:22px;fill:#fff;}
+  .floor-more-card .fmc-title{font-size:16px;font-weight:500;}
+  .floor-more-card .fmc-sub{font-size:12px;color:#b5b5b5;}
+
+  /* 电视楼层 banner */
+  .tv-floor{
+    margin-top:28px;background:linear-gradient(120deg,#101820,#24303b);border-radius:var(--radius);
+    overflow:hidden;display:flex;align-items:center;box-shadow:var(--shadow);position:relative;
+  }
+  .tv-floor .tv-media{flex:1;display:flex;align-items:center;justify-content:center;padding:30px;}
+  .tv-floor .tv-media img{max-height:280px;object-fit:contain;filter:drop-shadow(0 16px 30px rgba(0,0,0,.5));}
+  .tv-floor .tv-info{flex:0 0 380px;padding:40px;color:#fff;z-index:2;}
+  .tv-floor .tv-info h2{font-size:30px;font-weight:700;letter-spacing:1px;}
+  .tv-floor .tv-info p{color:#b9c2cc;margin-top:10px;font-size:14px;line-height:1.8;}
+  .tv-floor .tv-info .tv-price{margin-top:14px;font-size:22px;font-weight:700;color:#ffb45c;}
+  .tv-floor .tv-info .tv-btn{
+    display:inline-block;margin-top:22px;padding:10px 28px;background:var(--primary);color:#fff;
+    border-radius:30px;font-size:14px;transition:all .2s;
+  }
+  .tv-floor .tv-info .tv-btn:hover{background:var(--primary-dark);box-shadow:0 6px 16px rgba(255,103,0,.4);}
+
+  /* ============ 服务保障 ============ */
+  .services{margin-top:32px;background:#fff;border-radius:var(--radius);box-shadow:var(--shadow);}
+  .services-inner{display:grid;grid-template-columns:repeat(4,1fr);}
+  .service{display:flex;align-items:center;gap:12px;padding:20px 26px;border-right:1px solid var(--line);}
+  .service:last-child{border-right:none;}
+  .service svg{width:32px;height:32px;fill:var(--primary);flex-shrink:0;}
+  .service .sv-name{font-size:15px;font-weight:500;}
+  .service .sv-desc{font-size:12px;color:var(--muted);}
+
+  /* ============ 页脚 ============ */
+  footer{margin-top:40px;background:#fff;border-top:1px solid var(--line);}
+  .footer-links{display:grid;grid-template-columns:repeat(5,1fr);gap:20px;padding:36px 0;}
+  .footer-col h4{font-size:14px;font-weight:500;margin-bottom:12px;}
+  .footer-col a{display:block;font-size:12px;color:var(--muted);padding:4px 0;transition:color .2s;}
+  .footer-col a:hover{color:var(--primary);}
+  .footer-hotline{text-align:right;}
+  .footer-hotline .fh-num{font-size:24px;font-weight:700;color:var(--primary);}
+  .footer-hotline p{font-size:12px;color:var(--muted);margin-top:4px;}
+  .footer-bottom{border-top:1px solid var(--line);padding:16px 0;display:flex;justify-content:space-between;font-size:12px;color:var(--muted);}
+
+  /* ============ 购物车抽屉 ============ */
+  .cart-drawer{
+    position:fixed;top:0;right:-420px;width:400px;max-width:88vw;height:100%;background:#fff;
+    z-index:200;box-shadow:-8px 0 30px rgba(0,0,0,.15);transition:right .35s ease;
+    display:flex;flex-direction:column;
+  }
+  .cart-drawer.open{right:0;}
+  .cd-head{display:flex;align-items:center;justify-content:space-between;padding:18px 20px;border-bottom:1px solid var(--line);}
+  .cd-head h3{font-size:17px;font-weight:600;}
+  .cd-close{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:var(--muted);transition:all .2s;}
+  .cd-close:hover{background:var(--bg);color:var(--text);}
+  .cd-close svg{width:16px;height:16px;fill:currentColor;}
+  .cd-list{flex:1;overflow-y:auto;padding:10px 20px;}
+  .cd-empty{text-align:center;padding:60px 0;color:var(--muted);}
+  .cd-empty svg{width:56px;height:56px;fill:#dcdcdc;margin-bottom:12px;}
+  .cd-item{display:flex;gap:12px;padding:14px 0;border-bottom:1px dashed var(--line);}
+  .cd-item img{width:72px;height:72px;border-radius:8px;background:var(--bg);object-fit:contain;flex-shrink:0;}
+  .cd-item .cdi-info{flex:1;min-width:0;}
+  .cd-item .cdi-name{font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .cd-item .cdi-price{font-size:14px;color:var(--price);font-weight:600;margin-top:4px;}
+  .cd-item .cdi-ops{display:flex;align-items:center;justify-content:space-between;margin-top:8px;}
+  .qty-box{display:flex;align-items:center;border:1px solid var(--line);border-radius:6px;overflow:hidden;}
+  .qty-box button{width:26px;height:26px;font-size:14px;color:var(--text);transition:background .15s;}
+  .qty-box button:hover{background:var(--bg);}
+  .qty-box span{width:32px;text-align:center;font-size:13px;border-left:1px solid var(--line);border-right:1px solid var(--line);height:26px;line-height:26px;}
+  .cd-item .cdi-del{font-size:12px;color:var(--muted);}
+  .cd-item .cdi-del:hover{color:#e53935;}
+  .cd-foot{border-top:1px solid var(--line);padding:16px 20px;background:#fafafa;}
+  .cd-total{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;}
+  .cd-total span{font-size:13px;color:var(--muted);}
+  .cd-total b{font-size:22px;color:var(--price);font-weight:700;}
+  .cd-checkout{width:100%;height:44px;background:var(--primary);color:#fff;border-radius:8px;font-size:15px;font-weight:500;transition:background .2s;}
+  .cd-checkout:hover{background:var(--primary-dark);}
+
+  /* ============ 遮罩 / 弹窗 / toast ============ */
+  .overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:150;opacity:0;pointer-events:none;transition:opacity .3s;}
+  .overlay.show{opacity:1;pointer-events:auto;}
+  .login-modal{
+    position:fixed;top:50%;left:50%;transform:translate(-50%,-46%) scale(.95);width:400px;max-width:90vw;
+    background:#fff;border-radius:16px;z-index:180;padding:34px 34px 28px;opacity:0;pointer-events:none;
+    transition:all .3s;
+  }
+  .login-modal.show{opacity:1;pointer-events:auto;transform:translate(-50%,-50%) scale(1);}
+  .login-modal h3{font-size:20px;text-align:center;margin-bottom:6px;}
+  .login-modal .lm-sub{text-align:center;font-size:12px;color:var(--muted);margin-bottom:22px;}
+  .login-modal input{
+    width:100%;height:42px;border:1px solid var(--line);border-radius:8px;padding:0 14px;font-size:14px;
+    margin-bottom:14px;outline:none;transition:border-color .2s;
+  }
+  .login-modal input:focus{border-color:var(--primary);}
+  .login-modal .lm-btn{
+    width:100%;height:44px;background:var(--primary);color:#fff;border-radius:8px;font-size:15px;
+    transition:background .2s;margin-top:4px;
+  }
+  .login-modal .lm-btn:hover{background:var(--primary-dark);}
+  .login-modal .lm-close{position:absolute;top:14px;right:14px;width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:var(--muted);}
+  .login-modal .lm-close:hover{background:var(--bg);}
+  .login-modal .lm-close svg{width:14px;height:14px;fill:currentColor;}
+  .toast{
+    position:fixed;top:90px;left:50%;transform:translateX(-50%) translateY(-16px);background:rgba(31,31,31,.92);
+    color:#fff;padding:12px 22px;border-radius:8px;font-size:14px;z-index:300;opacity:0;
+    transition:all .35s;pointer-events:none;display:flex;align-items:center;gap:8px;
+  }
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+  .toast svg{width:16px;height:16px;fill:#52c41a;}
+  .back-top{
+    position:fixed;right:28px;bottom:90px;width:44px;height:44px;border-radius:10px;background:#fff;
+    box-shadow:var(--shadow-hover);display:flex;align-items:center;justify-content:center;z-index:90;
+    opacity:0;pointer-events:none;transition:all .3s;color:var(--text);
+  }
+  .back-top.show{opacity:1;pointer-events:auto;}
+  .back-top:hover{background:var(--primary);color:#fff;}
+  .back-top svg{width:18px;height:18px;fill:currentColor;}
+
+  /* ============ 响应式 ============ */
+  @media (max-width:1024px){
+    .nav a{padding:26px 8px;font-size:13px;}
+    .search input{width:150px;}
+    .search input:focus{width:190px;}
+    .quick{grid-template-columns:repeat(4,1fr);}
+    .tv-floor{flex-direction:column;text-align:center;}
+    .tv-floor .tv-info{flex:1;padding:20px 30px 40px;}
+  }
+  @media (max-width:768px){
+    .topbar-inner{justify-content:center;}
+    .tb-right{display:none;}
+    .header-inner{height:60px;gap:12px;flex-wrap:wrap;}
+    .nav{display:none;}
+    .search{order:3;width:100%;}
+    .search input{flex:1;width:auto;}
+    .search input:focus{width:auto;}
+    .slide-text{left:24px;}
+    .slide .slide-text h2{font-size:22px;}
+    .slide .slide-text p{font-size:13px;}
+    .slide .slide-text .slide-btn{margin-top:12px;padding:8px 18px;font-size:13px;}
+    .flash-grid,.floor-grid{grid-template-columns:repeat(2,1fr);}
+    .services-inner{grid-template-columns:repeat(2,1fr);}
+    .service{border-right:none;border-bottom:1px solid var(--line);}
+    .footer-links{grid-template-columns:repeat(2,1fr);}
+    .footer-hotline{text-align:left;grid-column:span 2;}
+    .footer-bottom{flex-direction:column;gap:6px;text-align:center;}
+  }
+  @media (max-width:480px){
+    .flash-grid,.floor-grid{grid-template-columns:1fr;}
+    .container{padding:0 12px;}
+    .quick{grid-template-columns:repeat(4,1fr);gap:6px;}
+    .quick-item{padding:10px 4px;}
+    .quick-item span{font-size:11px;}
+    .product-card .pc-img{height:150px;}
+  }
+</style>
+</head>
+<body>
+
+  <!-- ===== 顶栏 ===== -->
+  <div class="topbar">
+    <div class="container topbar-inner">
+      <span class="tb-left">欢迎来到小米商城，<a href="javascript:;" class="login-btn" id="topLogin">请登录</a><a href="javascript:;">免费注册</a></span>
+      <span class="tb-right">
+        <a href="javascript:;">我的订单</a>
+        <a href="javascript:;">我的关注</a>
+        <a href="javascript:;">小米之家</a>
+        <a href="javascript:;">客户服务</a>
+      </span>
+    </div>
+  </div>
+
+  <!-- ===== 主导航 ===== -->
+  <header class="header" id="header">
+    <div class="container header-inner">
+      <a class="logo" href="#">
+        <span class="mi-badge">
+          <svg viewBox="0 0 24 24"><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10 10-4.5 10-10S17.5 2 12 2zm0 18c-4.4 0-8-3.6-8-8s3.6-8 8-8 8 3.6 8 8-3.6 8-8 8z"/></svg>
+        </span>
+        <span class="logo-text">小米<span>商城</span></span>
+      </a>
+      <nav class="nav" id="mainNav">
+        <a href="#floor-手机" data-cat="手机" class="active">小米手机</a>
+        <a href="#floor-电脑" data-cat="电脑">笔记本</a>
+        <a href="#floor-智能家居" data-cat="智能家居">智能家电</a>
+        <a href="#floor-穿戴" data-cat="穿戴">穿戴音频</a>
+        <a href="#floor-电视" data-cat="电视">智能电视</a>
+        <a href="javascript:;">Redmi 红米</a>
+        <a href="javascript:;">生活周边</a>
+      </nav>
+      <div class="search">
+        <input type="text" id="searchInput" placeholder="搜索：小米15 空气净化器" autocomplete="off">
+        <button id="searchBtn" title="搜索">
+          <svg viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27a6.5 6.5 0 1 0-.7.7l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0A4.5 4.5 0 1 1 14 9.5 4.5 4.5 0 0 1 9.5 14z"/></svg>
+        </button>
+        <div class="search-panel" id="searchPanel"></div>
+      </div>
+      <button class="cart-btn" id="cartBtn">
+        <svg viewBox="0 0 24 24"><path d="M7 18c-1.1 0-1.99.9-1.99 2S5.9 22 7 22s2-.9 2-2-.9-2-2-2zM1 2v2h2l3.6 7.59-1.35 2.45c-.16.28-.25.61-.25.96 0 1.1.9 2 2 2h12v-2H7.42c-.14 0-.25-.11-.25-.25l.03-.12.9-1.63h7.45c.75 0 1.41-.41 1.75-1.03l3.58-6.49c.08-.14.12-.31.12-.48 0-.55-.45-1-1-1H5.21l-.94-2H1zm16 16c-1.1 0-1.99.9-1.99 2s.89 2 1.99 2 2-.9 2-2-.9-2-2-2z"/></svg>
+        购物车
+        <span class="cart-badge" id="cartBadge">0</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- ===== Hero 轮播 ===== -->
+  <section class="hero container">
+    <div class="hero-slider" id="heroSlider">
+      <div class="slide active">
+        <img src="assets/hero-phone.png" alt="Xiaomi 15 系列">
+        <div class="slide-text">
+          <h2>Xiaomi 15 系列<br>徕卡影像 强者之心</h2>
+          <p>骁龙 8 至尊版 · 2K 微曲屏 · 全等深微曲设计</p>
+          <span class="slide-btn" data-buy="p1">立即抢购</span>
+        </div>
+      </div>
+      <div class="slide">
+        <img src="assets/purifier-2.png" alt="米家智能生活">
+        <div class="slide-text">
+          <h2>米家智能生活<br>焕新你的家</h2>
+          <p>净化 · 扫地 · 联动，一套米家搞定</p>
+          <span class="slide-btn" data-buy="p6">去看看</span>
+        </div>
+      </div>
+      <div class="slide">
+        <img src="assets/tv-1.png" alt="小米电视大师">
+        <div class="slide-text">
+          <h2>小米电视 大师系列<br>把影院搬回家</h2>
+          <p>4K QD-Mini LED · 144Hz 旗舰画质</p>
+          <span class="slide-btn" data-buy="p14">了解详情</span>
+        </div>
+      </div>
+      <button class="hero-arrow prev" id="heroPrev"><svg viewBox="0 0 24 24"><path d="M15.41 7.41 14 6l-6 6 6 6 1.41-1.41L10.83 12z"/></svg></button>
+      <button class="hero-arrow next" id="heroNext"><svg viewBox="0 0 24 24"><path d="M8.59 16.59 10 18l6-6-6-6-1.41 1.41L13.17 12z"/></svg></button>
+      <div class="hero-dots" id="heroDots"></div>
+    </div>
+  </section>
+
+  <!-- ===== 快捷入口 ===== -->
+  <section class="quick container" id="quickNav">
+    <div class="quick-item" data-cat="手机"><div class="qi-icon"><svg viewBox="0 0 24 24"><path d="M17 1.01 7 1c-1.1 0-2 .9-2 2v18c0 1.1.9 2 2 2h10c1.1 0 2-.9 2-2V3c0-1.1-.9-1.99-2-1.99zM17 19H7V5h10v14z"/></svg></div><span>手机</span></div>
+    <div class="quick-item" data-cat="电脑"><div class="qi-icon"><svg viewBox="0 0 24 24"><path d="M21 3H3c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h7v2H8v2h8v-2h-2v-2h7c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 14H3V5h18v12z"/></svg></div><span>笔记本</span></div>
+    <div class="quick-item" data-cat="电视"><div class="qi-icon"><svg viewBox="0 0 24 24"><path d="M21 3H3c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h5v2h8v-2h5c1.1 0 1.99-.9 1.99-2L23 5c0-1.1-.9-2-2-2zm0 14H3V5h18v12z"/></svg></div><span>电视</span></div>
+    <div class="quick-item" data-cat="智能家居"><div class="qi-icon"><svg viewBox="0 0 24 24"><path d="M19 2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h4l3 3 3-3h4c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-7 3.3 1.5 3h3l-2.5 2 1 3.2L12 12l-3 1.5 1-3.2-2.5-2h3L12 5.3z"/></svg></div><span>智能家电</span></div>
+    <div class="quick-item" data-cat="穿戴"><div class="qi-icon"><svg viewBox="0 0 24 24"><path d="M20 4h-4l-4-4-4 4H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H4V6h4.52l3.48 3.5L15.52 6H20v14zM6 18h12V8H6v10zm2-8h8v6H8v-6z"/></svg></div><span>穿戴</span></div>
+    <div class="quick-item" data-cat="穿戴"><div class="qi-icon"><svg viewBox="0 0 24 24"><path d="M12 1a9 9 0 0 0-9 9v7c0 1.66 1.34 3 3 3h3v-8H5v-2c0-3.87 3.13-7 7-7s7 3.13 7 7v2h-4v8h3c1.66 0 3-1.34 3-3v-7a9 9 0 0 0-9-9z"/></svg></div><span>耳机</span></div>
+    <div class="quick-item" data-cat="智能家居"><div class="qi-icon"><svg viewBox="0 0 24 24"><path d="M12 3c-4.97 0-9 4.03-9 9v9h18v-9c0-4.97-4.03-9-9-9zM5.99 12c0-3.32 2.69-6 6.01-6s6.01 2.68 6.01 6v7H5.99v-7z"/></svg></div><span>智能家居</span></div>
+    <div class="quick-item" data-cat="电视"><div class="qi-icon"><svg viewBox="0 0 24 24"><path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6v-5c0-3.07-1.63-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.64 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z"/></svg></div><span>生活周边</span></div>
+  </section>
+
+  <!-- ===== 秒杀 ===== -->
+  <section class="flash container">
+    <div class="flash-head">
+      <div class="flash-title">
+        <span class="lightning"><svg viewBox="0 0 24 24"><path d="M13 2 3 14h7l-1 8 10-12h-7l1-8z" fill="#fff"/></svg></span>
+        <h2>限时秒杀</h2>
+      </div>
+      <div class="countdown">
+        <b>距结束</b>
+        <span class="cd-num" id="cdH">00</span><span class="cd-col">:</span>
+        <span class="cd-num" id="cdM">00</span><span class="cd-col">:</span>
+        <span class="cd-num" id="cdS">00</span>
+      </div>
+      <a class="flash-more" href="javascript:;">更多秒杀 &gt;</a>
+    </div>
+    <div class="flash-grid" id="flashGrid"></div>
+  </section>
+
+  <!-- ===== 商品楼层（JS 渲染） ===== -->
+  <div id="floors" class="container"></div>
+
+  <!-- ===== 服务保障 ===== -->
+  <section class="services container">
+    <div class="services-inner">
+      <div class="service">
+        <svg viewBox="0 0 24 24"><path d="M12 2 4 5v6c0 5.55 3.84 10.74 8 12 4.16-1.26 8-6.45 8-12V5l-8-3zm-2 15-4-4 1.41-1.41L10 14.17l6.59-6.59L18 9l-8 8z"/></svg>
+        <div><div class="sv-name">正品保障</div><div class="sv-desc">100% 官方正品</div></div>
+      </div>
+      <div class="service">
+        <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>
+        <div><div class="sv-name">极速发货</div><div class="sv-desc">当日达 / 次日达</div></div>
+      </div>
+      <div class="service">
+        <svg viewBox="0 0 24 24"><path d="M12 1C7.03 1 3 5.03 3 10v8c0 1.66 1.34 3 3 3h3v-8H6v-3c0-3.31 2.69-6 6-6s6 2.69 6 6v3h-3v8h3c1.66 0 3-1.34 3-3v-8c0-4.97-4.03-9-9-9z"/></svg>
+        <div><div class="sv-name">7 天无理由</div><div class="sv-desc">放心退换货</div></div>
+      </div>
+      <div class="service">
+        <svg viewBox="0 0 24 24"><path d="M21 6h-2v2h-2V6h-2V4h2V2h2v2h2v2zm-10 3c1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3 1.34 3 3 3zm0 4c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg>
+        <div><div class="sv-name">售后无忧</div><div class="sv-desc">专业客服团队</div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== 页脚 ===== -->
+  <footer>
+    <div class="container">
+      <div class="footer-links">
+        <div class="footer-col">
+          <h4>手机 / 穿戴</h4>
+          <a href="javascript:;">Xiaomi 手机</a>
+          <a href="javascript:;">Redmi 红米</a>
+          <a href="javascript:;">智能手表</a>
+          <a href="javascript:;">耳机音频</a>
+        </div>
+        <div class="footer-col">
+          <h4>家电 / 影音</h4>
+          <a href="javascript:;">智能电视</a>
+          <a href="javascript:;">笔记本</a>
+          <a href="javascript:;">空调 / 冰箱</a>
+          <a href="javascript:;">扫地机器人</a>
+        </div>
+        <div class="footer-col">
+          <h4>智能生活</h4>
+          <a href="javascript:;">米家 APP</a>
+          <a href="javascript:;">智能家居套装</a>
+          <a href="javascript:;">空气净化器</a>
+          <a href="javascript:;">智能门锁</a>
+        </div>
+        <div class="footer-col">
+          <h4>服务支持</h4>
+          <a href="javascript:;">帮助中心</a>
+          <a href="javascript:;">售后政策</a>
+          <a href="javascript:;">隐私政策</a>
+          <a href="javascript:;">用户协议</a>
+        </div>
+        <div class="footer-hotline">
+          <div class="fh-num">400-100-5678</div>
+          <p>周一至周日 8:00-18:00<br>仅收市话费</p>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <span>© 2026 小米商城（演示站）— 本页面为前端技术演示，商品与价格为示例数据</span>
+        <span>Xiaomi Mall · Demo</span>
+      </div>
+    </div>
+  </footer>
+
+  <!-- ===== 购物车抽屉 ===== -->
+  <div class="cart-drawer" id="cartDrawer">
+    <div class="cd-head">
+      <h3>购物车 <span id="cdCount" style="font-size:13px;color:var(--muted);font-weight:400;"></span></h3>
+      <button class="cd-close" id="cdClose"><svg viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg></button>
+    </div>
+    <div class="cd-list" id="cdList"></div>
+    <div class="cd-foot">
+      <div class="cd-total"><span>合计（不含运费）</span><b id="cdTotal">¥0</b></div>
+      <button class="cd-checkout" id="cdCheckout">去结算</button>
+    </div>
+  </div>
+
+  <!-- ===== 遮罩 / 登录弹窗 / Toast / 回到顶部 ===== -->
+  <div class="overlay" id="overlay"></div>
+  <div class="login-modal" id="loginModal">
+    <button class="lm-close" id="lmClose"><svg viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg></button>
+    <h3>欢迎登录小米商城</h3>
+    <p class="lm-sub">演示账号，任意输入即可登录</p>
+    <input type="text" id="lmPhone" placeholder="请输入手机号 / 邮箱">
+    <input type="password" id="lmPwd" placeholder="请输入密码">
+    <button class="lm-btn" id="lmSubmit">登 录</button>
+  </div>
+  <div class="toast" id="toast"></div>
+  <button class="back-top" id="backTop"><svg viewBox="0 0 24 24"><path d="M12 8l-6 6 1.41 1.41L12 10.83l4.59 4.58L18 14z"/></svg></button>
+
+  <script>
+  /* ===== 商品数据（演示数据） ===== */
+  const PRODUCTS = [
+    {id:'p1', name:'Xiaomi 15 Pro 徕卡光学', desc:'骁龙8至尊版 · 徕卡三摄 · 2K微曲屏', price:5499, old:5999, tag:'新品', img:'assets/hero-phone.png', cat:'手机'},
+    {id:'p2', name:'Xiaomi 14 骁龙8 Gen3', desc:'徕卡光学镜头 · 小米澎湃OS', price:3999, old:4299, tag:'热卖', img:'assets/phone-2.png', cat:'手机'},
+    {id:'p3', name:'Xiaomi 14 粉色 时尚版', desc:'3D曲面玻璃 · 5000mAh长续航', price:4299, old:null, tag:'', img:'assets/phone-3.png', cat:'手机'},
+    {id:'p4', name:'Redmi Book 14 轻薄本', desc:'2.8K 120Hz 屏 · 32GB · 1TB', price:4999, old:5499, tag:'', img:'assets/laptop-1.png', cat:'电脑'},
+    {id:'p5', name:'Redmi Book 16 2025', desc:'3.1K 165Hz 屏 · 金属机身', price:5799, old:6299, tag:'新品', img:'assets/laptop-2.png', cat:'电脑'},
+    {id:'p6', name:'米家扫地机器人 3', desc:'激光导航 · 4000Pa吸力 · 扫拖一体', price:1299, old:1699, tag:'热卖', img:'assets/robot-2.png', cat:'智能家居'},
+    {id:'p7', name:'米家扫地机器人 3C', desc:'智能路径规划 · APP远程控制', price:999, old:1299, tag:'', img:'assets/robot-1.png', cat:'智能家居'},
+    {id:'p8', name:'小米空气净化器 2S', desc:'除醛除菌 · 400m³/h CADR', price:899, old:1099, tag:'', img:'assets/purifier-1.png', cat:'智能家居'},
+    {id:'p9', name:'小米空气净化器 3', desc:'OLED屏 · 米家联动 · 低噪睡眠', price:999, old:1199, tag:'', img:'assets/purifier-2.png', cat:'智能家居'},
+    {id:'p10', name:'小米手表 S3', desc:'eSIM独立通话 · 双频GPS', price:999, old:1299, tag:'', img:'assets/watch-1.png', cat:'穿戴'},
+    {id:'p11', name:'小米手表 S1', desc:'蓝宝石表镜 · 全能运动模式', price:799, old:999, tag:'', img:'assets/watch-2.png', cat:'穿戴'},
+    {id:'p12', name:'Redmi Buds 6 降噪耳机', desc:'46dB深度降噪 · 入耳式', price:299, old:399, tag:'热卖', img:'assets/earbuds-1.png', cat:'穿戴'},
+    {id:'p13', name:'小米蓝牙耳机 青春版', desc:'半入耳 · 轻巧佩戴 · 通话清晰', price:99, old:129, tag:'', img:'assets/earbuds-2.png', cat:'穿戴'},
+    {id:'p14', name:'小米电视 大师 65英寸', desc:'4K QD-Mini LED · 144Hz · 大师画质', price:6999, old:7999, tag:'旗舰', img:'assets/tv-1.png', cat:'电视'},
+  ];
+  const CATS = [
+    {key:'手机', title:'Xiaomi 手机', en:'XIAOMI PHONE'},
+    {key:'电脑', title:'Redmi 笔记本', en:'REDMI BOOK'},
+    {key:'智能家居', title:'米家智能家居', en:'MIJIA SMART HOME'},
+    {key:'穿戴', title:'穿戴与音频', en:'WEARABLE & AUDIO'},
+  ];
+
+  /* ===== 工具 ===== */
+  const $ = s => document.querySelector(s);
+  const $$ = s => document.querySelectorAll(s);
+  const money = n => '¥' + n.toLocaleString('zh-CN');
+  const product = id => PRODUCTS.find(p => p.id === id);
+
+  /* ===== 商品卡片 / 楼层渲染 ===== */
+  function tagHtml(p){
+    if(!p.tag) return '';
+    const cls = p.tag==='新品' ? 'flag' : (p.tag==='热卖' ? 'hot' : '');
+    return '<span class="pc-tag '+cls+'">'+p.tag+'</span>';
+  }
+  function cardHtml(p){
+    const old = p.old ? '<small>'+money(p.old)+'</small>' : '';
+    return '<div class="product-card" data-id="'+p.id+'">'
+      + tagHtml(p)
+      + '<div class="pc-img"><img src="'+p.img+'" alt="'+p.name+'" loading="lazy"></div>'
+      + '<div class="pc-name">'+p.name+'</div>'
+      + '<div class="pc-desc">'+p.desc+'</div>'
+      + '<div class="pc-bottom"><div class="pc-price">'+money(p.price)+old+'</div>'
+      + '<button class="pc-btn" data-add="'+p.id+'" title="加入购物车"><svg viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg></button>'
+      + '</div></div>';
+  }
+  function moreCard(title, sub, cls){
+    return '<div class="floor-more-card '+cls+'" data-scroll="more">'
+      + '<span class="fmc-icon"><svg viewBox="0 0 24 24"><path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z"/></svg></span>'
+      + '<span class="fmc-title">'+title+'</span>'
+      + '<span class="fmc-sub">'+sub+'</span></div>';
+  }
+  function floorHead(c){
+    return '<div class="floor-head"><h2 class="section-title">'+c.title+'</h2>'
+      + '<span class="floor-en">'+c.en+'</span>'
+      + '<a class="floor-more" href="javascript:;">查看全部 &gt;</a></div>';
+  }
+  function renderFloors(){
+    const wrap = $('#floors');
+    let html = '';
+    CATS.forEach(function(c){
+      const items = PRODUCTS.filter(p => p.cat === c.key);
+      html += '<section class="floor" id="floor-'+c.key+'">'+floorHead(c)+'<div class="floor-grid">';
+      html += items.map(cardHtml).join('');
+      if(c.key==='手机') html += moreCard('查看全部手机', 'Xiaomi / Redmi 全系', '');
+      if(c.key==='电脑'){
+        html += moreCard('Redmi 新品', '轻薄本 · 游戏本', '');
+        html += moreCard('查看全部电脑', '更多新品上架中', '');
+      }
+      html += '</div></section>';
+    });
+    const tv = product('p14');
+    html += '<div class="tv-floor" id="floor-电视">'
+      + '<div class="tv-media"><img src="'+tv.img+'" alt="'+tv.name+'"></div>'
+      + '<div class="tv-info"><h2>'+tv.name+'</h2>'
+      + '<p>'+tv.desc+'。旗舰画质，影院级视听体验，把电影院搬回家。</p>'
+      + '<div class="tv-price">'+money(tv.price)+' <small style="font-size:14px;color:#7f8a94;text-decoration:line-through;">'+money(tv.old)+'</small></div>'
+      + '<span class="tv-btn" data-add="p14">立即购买</span></div></div>';
+    wrap.innerHTML = html;
+  }
+
+  /* ===== 秒杀渲染 ===== */
+  function renderFlash(){
+    const ids = ['p2','p6','p12','p8'];
+    $('#flashGrid').innerHTML = ids.map(function(id){
+      const p = product(id);
+      const fp = p.price >= 1000 ? p.price - 300 : (p.price >= 200 ? p.price - 100 : p.price - 20);
+      return '<div class="flash-card" data-id="'+id+'" data-add="'+id+'" title="点击抢购" style="cursor:pointer">'
+        + '<div class="fc-img"><img src="'+p.img+'" alt="'+p.name+'" loading="lazy"></div>'
+        + '<div class="fc-name">'+p.name+'</div>'
+        + '<div class="fc-price">'+money(fp)+'<small>'+money(p.price)+'</small></div>'
+        + '<div class="fc-bar"><i style="width:72%"></i></div>'
+        + '<div class="fc-stock">已抢 72%</div></div>';
+    }).join('');
+  }
+
+  /* ===== 购物车 ===== */
+  let cart = {};
+  try { cart = JSON.parse(localStorage.getItem('xmshop_cart') || '{}'); } catch(e) { cart = {}; }
+  const cartCount = () => Object.values(cart).reduce((a,b) => a + b, 0);
+  const cartTotal = () => Object.keys(cart).reduce((s,id) => s + product(id).price * cart[id], 0);
+  function saveCart(){
+    localStorage.setItem('xmshop_cart', JSON.stringify(cart));
+    const n = cartCount(), b = $('#cartBadge');
+    b.textContent = n;
+    b.classList.toggle('show', n > 0);
+    renderCart();
+  }
+  function addToCart(id, silent){
+    cart[id] = (cart[id] || 0) + 1;
+    saveCart();
+    if(!silent) toast('已加入购物车：' + product(id).name);
+  }
+  function renderCart(){
+    const list = $('#cdList'), ids = Object.keys(cart);
+    if(!ids.length){
+      list.innerHTML = '<div class="cd-empty"><svg viewBox="0 0 24 24"><path d="M7 18c-1.1 0-1.99.9-1.99 2S5.9 22 7 22s2-.9 2-2-.9-2-2-2zM1 2v2h2l3.6 7.59-1.35 2.45c-.16.28-.25.61-.25.96 0 1.1.9 2 2 2h12v-2H7.42c-.14 0-.25-.11-.25-.25l.03-.12.9-1.63h7.45c.75 0 1.41-.41 1.75-1.03l3.58-6.49c.08-.14.12-.31.12-.48 0-.55-.45-1-1-1H5.21l-.94-2H1zm16 16c-1.1 0-1.99.9-1.99 2s.89 2 1.99 2 2-.9 2-2-.9-2-2-2z"/></svg><p>购物车还是空的<br>快去挑选心仪的商品吧</p></div>';
+    } else {
+      list.innerHTML = ids.map(function(id){
+        const p = product(id), q = cart[id];
+        return '<div class="cd-item">'
+          + '<img src="'+p.img+'" alt="'+p.name+'">'
+          + '<div class="cdi-info"><div class="cdi-name">'+p.name+'</div>'
+          + '<div class="cdi-price">'+money(p.price * q)+'</div>'
+          + '<div class="cdi-ops"><div class="qty-box">'
+          + '<button data-dec="'+id+'">-</button><span>'+q+'</span><button data-inc="'+id+'">+</button>'
+          + '</div><button class="cdi-del" data-del="'+id+'">删除</button></div></div></div>';
+      }).join('');
+    }
+    $('#cdTotal').textContent = money(cartTotal());
+    $('#cdCount').textContent = '共 ' + cartCount() + ' 件';
+  }
+
+  /* ===== 轮播 ===== */
+  let heroIdx = 0, heroTimer;
+  const slides = $$('#heroSlider .slide');
+  const dotsBox = $('#heroDots');
+  slides.forEach(function(_, i){
+    const d = document.createElement('i');
+    if(i === 0) d.className = 'on';
+    d.onclick = function(){ showSlide(i); restart(); };
+    dotsBox.appendChild(d);
+  });
+  function showSlide(i){
+    heroIdx = (i + slides.length) % slides.length;
+    slides.forEach(function(s, j){ s.classList.toggle('active', j === heroIdx); });
+    [...dotsBox.children].forEach(function(d, j){ d.classList.toggle('on', j === heroIdx); });
+  }
+  function nextSlide(){ showSlide(heroIdx + 1); }
+  function restart(){
+    clearInterval(heroTimer);
+    heroTimer = setInterval(nextSlide, 4200);
+  }
+  $('#heroPrev').onclick = function(){ showSlide(heroIdx - 1); restart(); };
+  $('#heroNext').onclick = function(){ showSlide(heroIdx + 1); restart(); };
+  const heroBox = $('#heroSlider');
+  heroBox.addEventListener('mouseenter', () => clearInterval(heroTimer));
+  heroBox.addEventListener('mouseleave', restart);
+  restart();
+
+  /* ===== 秒杀倒计时 ===== */
+  function tick(){
+    const now = new Date(), end = new Date();
+    end.setHours(24, 0, 0, 0);
+    let s = Math.max(0, Math.floor((end - now) / 1000));
+    const pad = n => String(n).padStart(2, '0');
+    $('#cdH').textContent = pad(Math.floor(s / 3600));
+    $('#cdM').textContent = pad(Math.floor(s % 3600 / 60));
+    $('#cdS').textContent = pad(s % 60);
+  }
+  tick();
+  setInterval(tick, 1000);
+
+  /* ===== Toast ===== */
+  let toastTimer;
+  function toast(msg){
+    const t = $('#toast');
+    t.innerHTML = '<svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>' + msg;
+    t.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => t.classList.remove('show'), 2200);
+  }
+
+  /* ===== 购物车抽屉 ===== */
+  const drawer = $('#cartDrawer'), overlay = $('#overlay');
+  function openDrawer(){ drawer.classList.add('open'); overlay.classList.add('show'); }
+  function closeDrawer(){ drawer.classList.remove('open'); overlay.classList.remove('show'); }
+  $('#cartBtn').onclick = openDrawer;
+  $('#cdClose').onclick = closeDrawer;
+  overlay.onclick = closeDrawer;
+  $('#cdCheckout').onclick = function(){
+    if(!cartCount()){ toast('购物车还是空的，先去逛逛吧'); return; }
+    toast('演示站点：结算功能未开通，已为你保留购物车数据');
+  };
+
+  /* ===== 全局事件委托 ===== */
+  document.addEventListener('click', function(e){
+    const buy = e.target.closest('[data-buy]');
+    if(buy){ addToCart(buy.getAttribute('data-buy')); return; }
+    const add = e.target.closest('[data-add]');
+    if(add){ addToCart(add.getAttribute('data-add')); return; }
+    const inc = e.target.closest('[data-inc]');
+    if(inc){ const id = inc.getAttribute('data-inc'); cart[id]++; saveCart(); return; }
+    const dec = e.target.closest('[data-dec]');
+    if(dec){ const id = dec.getAttribute('data-dec'); cart[id]--; if(cart[id] <= 0) delete cart[id]; saveCart(); return; }
+    const del = e.target.closest('[data-del]');
+    if(del){ delete cart[del.getAttribute('data-del')]; saveCart(); toast('已从购物车移除'); return; }
+    const quick = e.target.closest('.quick-item[data-cat]');
+    if(quick){ scrollToFloor(quick.getAttribute('data-cat')); return; }
+    const navLink = e.target.closest('#mainNav a[data-cat]');
+    if(navLink){ e.preventDefault(); scrollToFloor(navLink.getAttribute('data-cat')); return; }
+    if(!e.target.closest('.search')) $('#searchPanel').classList.remove('open');
+  });
+  function scrollToFloor(cat){
+    const el = document.getElementById('floor-' + cat);
+    if(el){ el.scrollIntoView({behavior:'smooth', block:'start'}); }
+    $$('#mainNav a').forEach(a => a.classList.toggle('active', a.getAttribute('data-cat') === cat));
+  }
+
+  /* ===== 搜索 ===== */
+  const searchInput = $('#searchInput'), searchPanel = $('#searchPanel');
+  function doSearch(){
+    const kw = searchInput.value.trim().toLowerCase();
+    if(!kw){ searchPanel.classList.remove('open'); searchPanel.innerHTML = ''; return; }
+    const hits = PRODUCTS.filter(p => (p.name + p.desc + p.cat).toLowerCase().indexOf(kw) > -1).slice(0, 6);
+    searchPanel.innerHTML = hits.length
+      ? hits.map(p => '<div class="sp-item" data-add="'+p.id+'"><img src="'+p.img+'" alt=""><span class="sp-name">'+p.name+'</span><span class="sp-price">'+money(p.price)+'</span></div>').join('')
+      : '<div class="sp-empty">未找到相关商品，试试其他关键词</div>';
+    searchPanel.classList.add('open');
+  }
+  searchInput.addEventListener('input', doSearch);
+  $('#searchBtn').onclick = doSearch;
+  searchInput.addEventListener('keydown', function(e){ if(e.key === 'Enter') doSearch(); });
+
+  /* ===== 导航高亮（滚动监听楼层） ===== */
+  const floorObserver = new IntersectionObserver(function(entries){
+    entries.forEach(function(en){
+      if(en.isIntersecting){
+        const cat = en.target.id.replace('floor-', '');
+        $$('#mainNav a').forEach(a => a.classList.toggle('active', a.getAttribute('data-cat') === cat));
+      }
+    });
+  }, {rootMargin: '-25% 0px -65% 0px'});
+  $$('#floors .floor, #floors .tv-floor').forEach(f => floorObserver.observe(f));
+
+  /* ===== 吸顶阴影 / 回到顶部 ===== */
+  const header = $('#header'), backTop = $('#backTop');
+  window.addEventListener('scroll', function(){
+    header.classList.toggle('scrolled', window.scrollY > 4);
+    backTop.classList.toggle('show', window.scrollY > 640);
+  }, {passive:true});
+  backTop.onclick = function(){ window.scrollTo({top:0, behavior:'smooth'}); };
+
+  /* ===== 登录弹窗 ===== */
+  const loginModal = $('#loginModal'), topLogin = $('#topLogin');
+  function openLogin(){ overlay.classList.add('show'); loginModal.classList.add('show'); }
+  function closeLogin(){ overlay.classList.remove('show'); loginModal.classList.remove('show'); }
+  topLogin.onclick = openLogin;
+  $('#lmClose').onclick = closeLogin;
+  $('#lmSubmit').onclick = function(){
+    const phone = $('#lmPhone').value.trim();
+    if(!phone){ toast('请输入手机号或邮箱（演示任意输入）'); return; }
+    topLogin.textContent = 'Hi，小米用户';
+    topLogin.style.color = '#52c41a';
+    closeLogin();
+    toast('登录成功，欢迎回来');
+    $('#lmPhone').value = ''; $('#lmPwd').value = '';
+  };
+
+  /* ===== 初始化 ===== */
+  renderFloors();
+  renderFlash();
+  saveCart();
+  </script>
+</body>
+</html>
